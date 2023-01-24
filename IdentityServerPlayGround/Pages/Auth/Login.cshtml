@@ -1,0 +1,31 @@
+﻿@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@model IdentityServerPlayGround.Pages.Auth.LoginModel
+@{
+
+}
+<p>Enter a customer name:</p>
+
+<form method="post">
+    UserName:
+    <input asp-for="@Model.UserName" />
+    Password:
+    <input asp-for="@Model.Password" />
+    <input type="submit" />
+</form>
+
+External Logins ...
+@foreach (var provider in Model.ExternalProviders)
+{
+    <form asp-page-handler="ExternalLogin" method="post">
+    <p>Provider: @provider.Name</p>
+        <input hidden value="@provider.DisplayName" asp-for="@Model.ProviderName" />
+        <input hidden  asp-for="@Model.ReturnUrl" />
+
+    <button type="submit" value="@provider.Name">
+            @provider.DisplayName
+        
+    </button>
+    </form>
+} 

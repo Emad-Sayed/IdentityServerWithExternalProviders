@@ -1,4 +1,5 @@
-﻿using IdentityServerPlayGround.EF;
+﻿using IdentityServer4.Services;
+using IdentityServerPlayGround.EF;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,11 +12,15 @@ namespace IdentityServerPlayGround.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IIdentityServerInteractionService _interaction;
 
-        public AuthController( UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager)
+
+        public AuthController( UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager,
+            IIdentityServerInteractionService interaction)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _interaction = interaction;
         }
         [HttpPost(Name = "NewUser")]
         public async Task<ActionResult> Post()
@@ -29,19 +34,15 @@ namespace IdentityServerPlayGround.Controllers
             }
             return Ok();
         }
-        [HttpGet(Name = "Login")]
-        public async Task<ActionResult> Login(string ReturnUrl)
-        {
-            //Return Login Page
-            //Then Use This Login
-            var result = await _signInManager.PasswordSignInAsync("emad","P@ssw0rd", false, lockoutOnFailure: true);
-            return Redirect(ReturnUrl);
-        }
         [HttpGet(Name = "Logout")]
-        public async Task<ActionResult> Logout(string LogoutId)
+        public async Task<ActionResult> Logout(string logoutId)
         {
+            var logout = await _interaction.GetLogoutContextAsync(logoutId);
+
             await _signInManager.SignOutAsync();
-            return RedirectToPage("/");
+
+
+            return Redirect(logout?.SignOutIFrameUrl);
         }
 
 

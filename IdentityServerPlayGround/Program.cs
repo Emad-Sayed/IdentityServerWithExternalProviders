@@ -1,6 +1,8 @@
 using IdentityServer4.Services;
 using IdentityServerPlayGround;
 using IdentityServerPlayGround.EF;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -12,6 +14,8 @@ var connectionString = builder.Configuration.GetConnectionString("IdentityServer
 var migrationAssembly = typeof(Program).GetTypeInfo().Assembly.GetName().Name;
 
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,9 +44,35 @@ builder.Services.AddIdentityServer()
 
 builder.Services.ConfigureApplicationCookie(config =>
 {
-    config.LoginPath = "/api/Auth/Login";
-    config.LogoutPath = "/api/Auth/Logout";
+    config.LoginPath = "/Auth/Login";
+    config.LogoutPath = "/Auth/Logout";
 });
+
+builder.Services.AddAuthentication(options =>
+{
+    // Store the session to cookies
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    // OpenId authentication
+    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+})
+    .AddCookie("Cookies")
+    .AddOpenIdConnect(options =>
+    {
+        options.Authority = "http://localhost:8080/realms/playGround";
+        options.MetadataAddress = "http://localhost:8080/realms/playGround/.well-known/openid-configuration";
+        // Client configured in the Keycloak
+
+        // For testing we disable https (should be true for production)
+        options.RequireHttpsMetadata = false;
+        options.SaveTokens = true;
+        options.ClientId = "test-client";
+        // Client secret shared with Keycloak
+        //options.ClientSecret = "nrnsK6od01BpzJ0NTzvdC2DLt0ta72zp";
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.Scope.Add("openid");
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,6 +90,7 @@ app.UseAuthentication();;
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapRazorPages();
 
 app.UseIdentityServer();
 
