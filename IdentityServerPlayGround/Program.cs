@@ -52,11 +52,11 @@ builder.Services.AddAuthentication(options =>
 {
     // Store the session to cookies
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    // OpenId authentication
-    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    // Which Default Redirection (Challange) if the user not authenticated on API
+    options.DefaultChallengeScheme = "NafathOpenId";
 })
     .AddCookie("Cookies")
-    .AddOpenIdConnect(options =>
+    .AddOpenIdConnect("NafathOpenId","Nafath",options =>
     {
         options.Authority = "http://localhost:8080/realms/playGround";
         options.MetadataAddress = "http://localhost:8080/realms/playGround/.well-known/openid-configuration";
@@ -87,6 +87,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();;
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
