@@ -43,7 +43,7 @@ namespace IdentityServerPlayGround.Pages.Auth
         }
         public async Task<ActionResult> OnPostExternalLogin()
         {
-            var redirectUrl = "/Auth/ExternalProviderCallBack?ReturnUrl="+WebUtility.UrlEncode(ReturnUrl);
+            var redirectUrl = "/Account/ExternalProviderCallBack?ReturnUrl="+WebUtility.UrlEncode(ReturnUrl);
             var props =  _signInManager.ConfigureExternalAuthenticationProperties(ProviderName, redirectUrl);
             return Challenge(props);
         }

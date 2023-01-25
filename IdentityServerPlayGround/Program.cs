@@ -42,11 +42,6 @@ builder.Services.AddIdentityServer()
         options.ConfigureDbContext = b => b.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
     });
 
-builder.Services.ConfigureApplicationCookie(config =>
-{
-    config.LoginPath = "/Auth/Login";
-    config.LogoutPath = "/Auth/Logout";
-});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -55,8 +50,8 @@ builder.Services.AddAuthentication(options =>
     // Which Default Redirection (Challange) if the user not authenticated on API
     options.DefaultChallengeScheme = "NafathOpenId";
 })
-    .AddCookie("Cookies")
-    .AddOpenIdConnect("NafathOpenId","Nafath",options =>
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddOpenIdConnect("NafathOpenId", "Nafath", options =>
     {
         options.Authority = "http://localhost:8080/realms/playGround";
         options.MetadataAddress = "http://localhost:8080/realms/playGround/.well-known/openid-configuration";
@@ -85,7 +80,7 @@ if (app.Environment.IsDevelopment())
 //DatabaseInitializer.PopulateIdentityServer(app);
 
 app.UseHttpsRedirection();
-app.UseAuthentication();;
+app.UseAuthentication(); ;
 
 app.UseAuthentication();
 app.UseAuthorization();
